@@ -128,6 +128,7 @@ class Premailer(object):
                  css_text=None,
                  method="html",
                  base_path=None,
+                 internal_url_map=None,
                  disable_basic_attributes=None,
                  disable_validation=False,
                  cache_css_parsing=True,
@@ -157,6 +158,7 @@ class Premailer(object):
         self.strip_important = strip_important
         self.method = method
         self.base_path = base_path
+        self.internal_url_map = internal_url_map or {}
         if disable_basic_attributes is None:
             disable_basic_attributes = []
         self.disable_basic_attributes = disable_basic_attributes
@@ -515,6 +517,13 @@ class Premailer(object):
                 url = 'https:' + url
             else:
                 url = 'http:' + url
+
+        # Iterate through internal urls and convert urls to absolute paths
+        for url_prefix in self.internal_url_map.keys():
+            if url.startswith(url_prefix):
+                url = os.path.join(self.internal_url_map[url_prefix],
+                                   url[len(url_prefix):])
+                break
 
         if url.startswith('http://') or url.startswith('https://'):
             css_body = self._load_external_url(url)
